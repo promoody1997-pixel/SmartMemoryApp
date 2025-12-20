@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.smartmemoryapp">
 
     <application
         android:label="Smart Memory"
-        android:theme="@android:style/Theme.DeviceDefault.Light.DarkActionBar">
+        android:theme="@android:style/Theme.Material.Light.DarkActionBar">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.smartmemoryapp.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
