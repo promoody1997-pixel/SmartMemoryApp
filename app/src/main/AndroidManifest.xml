@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.smartmemoryapp">
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:label="Smart Memory"
-        android:theme="@android:style/Theme.Material.Light.DarkActionBar">
+        android:theme="@android:style/Theme.DeviceDefault.Light.DarkActionBar">
 
         <activity
             android:name="com.example.smartmemoryapp.MainActivity"
