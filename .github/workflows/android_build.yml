@@ -1,53 +1,35 @@
-name: Android Build (Golden Template)
+name: Android Build NO WRAPPER
 
 on:
   push:
     branches: [ "main" ]
-  # إضافة تشغيل يدوي (workflow_dispatch) لتتمكن من تشغيل البناء يدوياً عند الحاجة
-  workflow_dispatch:
 
 jobs:
   build:
-    # استخدام أحدث إصدار من Ubuntu
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      # استخدام أحدث إصدار من إجراء سحب الكود
       uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      # استخدام أحدث إصدار من إجراء إعداد Java
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-        
-    - name: Setup Android SDK
-      # إعداد بيئة Android SDK
-      uses: android-actions/setup-android@v3
-
-    - name: Grant execute permission for gradlew
-      # حل مشكلة Exit Code 127
-      run: chmod +x gradlew
-
+    
+    # هنا الخطوة السحرية: نطلب من GitHub تثبيت Gradle 8.0 لنا
     - name: Setup Gradle
-      # إعداد Gradle
-      uses: gradle/gradle-build-action@v3
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.0'
       
-    - name: Clean Build
-      # تنظيف المشروع قبل البناء لضمان بناء نظيف
-      run: ./gradlew clean --no-daemon
-
+    # لاحظ: نستخدم كلمة gradle مباشرة وليس ./gradlew
     - name: Build Debug APK
-      # تنفيذ أمر البناء
-      run: ./gradlew assembleDebug --no-daemon
+      run: gradle assembleDebug --no-daemon --stacktrace
 
     - name: Upload APK
-      # استخدام أحدث إصدار من إجراء تحميل المخرجات (حل مشكلة v3)
       uses: actions/upload-artifact@v4
       with:
         name: smart-memory-apk
         path: app/build/outputs/apk/debug/app-debug.apk
-        # إضافة خيار الاحتفاظ بالمخرج لمدة 7 أيام
-        retention-days: 7
