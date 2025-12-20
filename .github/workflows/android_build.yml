@@ -18,19 +18,20 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         
-    # **الخطوة الجديدة والمهمة:** إعداد بيئة Android SDK
+    # الخطوة المضافة: إعداد بيئة Android SDK
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
       
-    # **تعديل بسيط:** استخدام ./gradlew بدلاً من gradle
+    # تعديل بسيط: استخدام ./gradlew بدلاً من gradle
     - name: Build Debug APK
       run: ./gradlew assembleDebug --no-daemon
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+    # **التعديل النهائي:** تحديث الإصدار من v3 إلى v4
+      uses: actions/upload-artifact@v4
       with:
         name: smart-memory-apk
         path: app/build/outputs/apk/debug/app-debug.apk
