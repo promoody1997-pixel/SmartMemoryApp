@@ -10,25 +10,27 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
         
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
-      
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    # **الخطوة الجديدة والمهمة:** إعداد بيئة Android SDK
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
 
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+      
+    # **تعديل بسيط:** استخدام ./gradlew بدلاً من gradle
     - name: Build Debug APK
       run: ./gradlew assembleDebug --no-daemon
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: smart-memory-apk
         path: app/build/outputs/apk/debug/app-debug.apk
