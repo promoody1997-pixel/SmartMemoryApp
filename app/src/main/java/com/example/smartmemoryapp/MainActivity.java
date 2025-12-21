@@ -7,7 +7,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // هذا السطر يستدعي ملف التصميم activity_main.xml
+        // هذا السطر يربط الكود بملف التصميم الذي وضعناه في الخطوة 1
         setContentView(R.layout.activity_main);
     }
 }
