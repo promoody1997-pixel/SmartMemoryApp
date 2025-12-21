@@ -2,6 +2,7 @@ package com.example.smartmemoryapp;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -28,7 +29,7 @@ public class OverlayActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // إعدادات الشاشة لتفتح فوق القفل
+        // إعدادات لفتح الشاشة فوق القفل
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true);
             setTurnScreenOn(true);
@@ -43,28 +44,28 @@ public class OverlayActivity extends Activity {
 
         taskName = getIntent().getStringExtra("task_name");
         TextView taskText = findViewById(R.id.overlayTaskName);
-        if(taskText != null) taskText.setText(taskName);
+        if(taskText != null && taskName != null) taskText.setText(taskName);
 
-        // تشغيل الصوت والاهتزاز
+        // تشغيل التنبيه
         startAlarmSound();
 
-        Button btnDismiss = findViewById(R.id.btnDismiss);
-        if(btnDismiss != null) btnDismiss.setOnClickListener(v -> stopAndExit());
+        // برمجة زر الإيقاف (يغلق الصوت فقط ولا يحذف المهمة)
+        Button btnStop = findViewById(R.id.btnStop);
+        btnStop.setOnClickListener(v -> stopAndExit());
         
-        setupSnoozeButtons();
-    }
-    
-    private void setupSnoozeButtons() {
-        Button btnSnooze = findViewById(R.id.btnSnooze);
-        if(btnSnooze != null) {
-            btnSnooze.setText("غفوة 5 دقائق 💤");
-            btnSnooze.setOnClickListener(v -> snoozeAlarm(5));
-        }
+        // برمجة أزرار الغفوة
+        findViewById(R.id.btnSnooze5).setOnClickListener(v -> snoozeAlarm(5));
+        findViewById(R.id.btnSnooze15).setOnClickListener(v -> snoozeAlarm(15));
+        findViewById(R.id.btnSnooze60).setOnClickListener(v -> snoozeAlarm(60));
     }
 
     private void startAlarmSound() {
         try {
-            // 1. رفع الصوت للحد الأقصى (لضمان السماع)
+            // إلغاء أي إشعار سابق في شريط الإشعارات
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancelAll();
+
+            // رفع الصوت
             AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             if (audioManager != null) {
                 audioManager.setStreamVolume(AudioManager.STREAM_ALARM, 
@@ -72,63 +73,54 @@ public class OverlayActivity extends Activity {
                                              0);
             }
 
-            // 2. البحث عن نغمة (منبه -> رنين -> إشعارات)
             Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            if (soundUri == null) {
-                soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-                if (soundUri == null) {
-                    soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                }
-            }
+            if (soundUri == null) soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 
-            // 3. تشغيل المشغل
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setDataSource(getApplicationContext(), soundUri);
             mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build());
-            mediaPlayer.setLooping(true); // تكرار لا نهائي
+            mediaPlayer.setLooping(true);
             mediaPlayer.prepare();
             mediaPlayer.start();
 
-            // 4. الاهتزاز
             vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             if (vibrator != null) {
-                long[] pattern = {0, 1000, 1000}; // اهتزاز ثانية، توقف ثانية
+                long[] pattern = {0, 1000, 1000};
                 vibrator.vibrate(pattern, 0);
             }
 
         } catch (Exception e) {
-            // في حالة فشل كل شيء، حاول استخدام ToneGenerator كحل أخير (صوت بيب)
-            try {
-                android.media.ToneGenerator toneG = new android.media.ToneGenerator(AudioManager.STREAM_ALARM, 100);
-                toneG.startTone(android.media.ToneGenerator.TONE_CDMA_EMERGENCY_RINGBACK, 20000); 
-            } catch (Exception ex) { }
             e.printStackTrace();
         }
     }
 
     private void snoozeAlarm(int minutes) {
-        stopAlarm();
+        stopAlarm(); // إيقاف الصوت الحالي
         
+        // جدولة منبه جديد
         AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this, AlarmReceiver.class);
         intent.putExtra("task_name", taskName);
+        
+        // استخدام ID فريد للغفوة
         PendingIntent pi = PendingIntent.getBroadcast(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_IMMUTABLE);
         
         long triggerTime = System.currentTimeMillis() + (minutes * 60 * 1000);
+        
         if (am != null) {
-            am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pi);
+            am.setAlarmClock(new AlarmManager.AlarmClockInfo(triggerTime, pi), pi);
         }
         
-        Toast.makeText(this, "تم تأجيل المنبه " + minutes + " دقيقة", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "تمت الغفوة: " + minutes + " دقيقة 💤", Toast.LENGTH_SHORT).show();
         finishAndRemoveTask();
     }
 
     private void stopAndExit() {
         stopAlarm();
-        finishAndRemoveTask();
+        finishAndRemoveTask(); // يغلق الشاشة ويعود للتطبيق أو الصفحة الرئيسية
     }
 
     private void stopAlarm() {
