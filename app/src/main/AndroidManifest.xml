@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:label="Smart Memory"
@@ -16,7 +18,8 @@
 
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -27,11 +30,17 @@
         
         <activity android:name=".OverlayActivity" 
                   android:exported="false"
+                  android:excludeFromRecents="true"
+                  android:launchMode="singleInstance"
                   android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen"
                   android:showOnLockScreen="true"
                   android:turnScreenOn="true"/>
 
-        <receiver android:name=".AlarmReceiver" android:enabled="true" android:exported="false"/>
+        <receiver android:name=".AlarmReceiver" android:enabled="true" android:exported="false">
+             <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 
