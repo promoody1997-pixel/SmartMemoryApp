@@ -2,42 +2,110 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#CF6679"
+    android:background="#0F172A"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="30dp">
+    android:padding="20dp">
 
-    <TextView
-        android:text="⏰ تنبيه!"
-        android:textSize="40sp"
-        android:textColor="#000"
-        android:textStyle="bold"/>
-
-    <TextView
-        android:id="@+id/overlayTaskName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="اسم المهمة هنا"
-        android:textSize="28sp"
-        android:textColor="#000"
-        android:layout_marginTop="20dp"
-        android:gravity="center"/>
-
-    <Button
-        android:id="@+id/btnDismiss"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:text="إيقاف"
-        android:textSize="20sp"
-        android:backgroundTint="#000000"
-        android:textColor="#FFF"
-        android:layout_marginTop="50dp"/>
-
-    <Button
-        android:id="@+id/btnSnooze"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="غفوة 5 دقائق"
-        android:layout_marginTop="10dp"/>
+        android:background="#EF4444"
+        android:padding="3dp"
+        android:elevation="10dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#1E293B"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="30dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔔"
+                android:textSize="50sp"
+                android:layout_marginBottom="10dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="حان الموعد! ⏰"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"/>
+
+            <TextView
+                android:id="@+id/overlayTaskName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="اسم المهمة هنا"
+                android:textColor="#94A3B8"
+                android:textSize="20sp"
+                android:gravity="center"
+                android:layout_marginBottom="40dp"
+                android:background="#0F172A"
+                android:padding="15dp"
+                android:minWidth="200dp"/>
+
+            <Button
+                android:id="@+id/btnStop"
+                android:layout_width="match_parent"
+                android:layout_height="65dp"
+                android:text="إيقاف المنبه ❌"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:backgroundTint="#DC2626"
+                android:textColor="#FFFFFF"
+                android:layout_marginBottom="25dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="أو اختر غفوة (تأجيل):"
+                android:textColor="#64748B"
+                android:layout_marginBottom="10dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnSnooze5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="5 د"
+                    android:backgroundTint="#334155"
+                    android:textColor="#FFF"
+                    android:layout_marginEnd="5dp"/>
+
+                <Button
+                    android:id="@+id/btnSnooze15"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="15 د"
+                    android:backgroundTint="#334155"
+                    android:textColor="#FFF"
+                    android:layout_marginEnd="5dp"/>
+
+                <Button
+                    android:id="@+id/btnSnooze60"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ساعة"
+                    android:backgroundTint="#334155"
+                    android:textColor="#FFF"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>
