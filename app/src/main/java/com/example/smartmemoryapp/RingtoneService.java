@@ -20,7 +20,8 @@ import android.os.Vibrator;
 public class RingtoneService extends Service {
     private MediaPlayer mediaPlayer;
     private Vibrator vibrator;
-    private static final String CHANNEL_ID = "SERVICE_ALARM_CHANNEL_MAX";
+    // زدنا الرقم هنا لنجبر النظام على تحديث نفسه
+    private static final String CHANNEL_ID = "ALARM_SERVICE_SYNC_V3";
 
     @Override
     public IBinder onBind(Intent intent) { return null; }
@@ -29,26 +30,26 @@ public class RingtoneService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String taskName = (intent != null && intent.getStringExtra("task_name") != null) ? intent.getStringExtra("task_name") : "تنبيه";
 
-        // 1. تجهيز نية فتح الشاشة
+        // 1. تجهيز أمر فتح الشاشة
         Intent fullScreenIntent = new Intent(this, OverlayActivity.class);
         fullScreenIntent.putExtra("task_name", taskName);
         fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        // 2. إظهار الإشعار (مهم جداً لاستمرار الخدمة)
-        startForeground(1, buildNotification(taskName, fullScreenIntent));
-
-        // 3. محاولة فتح الشاشة مباشرة (الحل لمشكلتك)
-        // هذا السطر يضمن ظهور الشاشة حتى لو كنت داخل التطبيق
+        // 2. محاولة فتح الشاشة (Overlay) فوراً كأول خطوة
         try {
             startActivity(fullScreenIntent);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // 4. تشغيل الصوت (بتأخير بسيط جداً لضمان تحميل الشاشة)
+        // 3. إظهار الإشعار (مهم لاستقرار الخدمة)
+        startForeground(1, buildNotification(taskName, fullScreenIntent));
+
+        // 4. تشغيل الصوت (بتأخير 2.5 ثانية)
+        // هذا الزمن كافٍ جداً ليقوم الهاتف بفتح الشاشة وعرض الأزرار قبل أن يبدأ الإزعاج
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             playAlarm();
-        }, 500); // قللنا التأخير لـ نصف ثانية لأن الشاشة ستفتح مباشرة
+        }, 2500); 
 
         return START_NOT_STICKY;
     }
@@ -58,7 +59,7 @@ public class RingtoneService extends Service {
                 this, 0, fullScreenIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Critical Alarm Service", NotificationManager.IMPORTANCE_MAX);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Alarm Service", NotificationManager.IMPORTANCE_MAX);
             channel.setSound(null, null);
             channel.enableVibration(true);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
@@ -79,8 +80,9 @@ public class RingtoneService extends Service {
 
     private void playAlarm() {
         try {
-            if (mediaPlayer != null && mediaPlayer.isPlaying()) return; // منع التكرار
-
+            // نتأكد أولاً أننا لم نوقف الخدمة قبل انقضاء مهلة التأخير
+            // هذا يمنع الصوت من العمل إذا قمت أنت بإلغاء المنبه بسرعة خلال الـ 2.5 ثانية
+            
             Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             if (soundUri == null) soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
 
@@ -103,6 +105,7 @@ public class RingtoneService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        // تنظيف فوري عند الإغلاق
         if (mediaPlayer != null) { 
             try {
                 if (mediaPlayer.isPlaying()) mediaPlayer.stop();
