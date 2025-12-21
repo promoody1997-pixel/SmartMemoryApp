@@ -2,49 +2,56 @@ package com.example.smartmemoryapp;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
-import android.view.View;
+import java.util.Map;
 
 public class MainActivity extends Activity {
 
     private EditText taskInput;
     private TextView voiceStatus;
+    private LinearLayout tasksContainer;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // طلب صلاحية الظهور فوق التطبيقات
+        prefs = getSharedPreferences("SmartMemoryTasks", MODE_PRIVATE);
+        
         checkOverlayPermission();
 
-        // ربط العناصر بالتصميم الجديد
         taskInput = findViewById(R.id.mainTaskInput);
         voiceStatus = findViewById(R.id.voiceStatus);
+        tasksContainer = findViewById(R.id.tasksContainer);
 
-        // زر الميكروفون
         if(findViewById(R.id.btnMicMain) != null) {
             findViewById(R.id.btnMicMain).setOnClickListener(v -> startVoiceInput());
         }
 
-        // أزرار الوقت الملونة (تعمل فوراً)
         setupTimeButton(R.id.btn15m, 15);
         setupTimeButton(R.id.btn30m, 30);
         setupTimeButton(R.id.btn1h, 60);
         setupTimeButton(R.id.btn2h, 120);
+
+        // استرجاع المهام المحفوظة عند فتح التطبيق
+        loadSavedTasks();
     }
 
     private void setupTimeButton(int btnId, int minutes) {
@@ -52,32 +59,37 @@ public class MainActivity extends Activity {
         if (btn != null) {
             btn.setOnClickListener(v -> {
                 String task = "";
-                if (taskInput != null) {
-                    task = taskInput.getText().toString();
-                }
+                if (taskInput != null) task = taskInput.getText().toString();
+                if (task.isEmpty()) task = "مهمة سريعة";
                 
-                if (task.isEmpty()) {
-                    task = "مهمة سريعة"; // اسم افتراضي
-                }
-                
-                scheduleAlarm(task, minutes);
-                addVisualTask(task, minutes);
-                
-                Toast.makeText(this, "تم ضبط المنبه بعد " + minutes + " دقيقة", Toast.LENGTH_SHORT).show();
-                if (taskInput != null) taskInput.setText(""); // تفريغ الحقل
+                createNewTask(task, minutes);
+                if (taskInput != null) taskInput.setText(""); 
             });
         }
     }
 
-    // دالة لإضافة المهمة شكلياً في القائمة
-    private void addVisualTask(String title, int minutes) {
-        LinearLayout container = findViewById(R.id.tasksContainer);
-        if (container == null) return;
+    private void createNewTask(String task, int minutes) {
+        long triggerTime = System.currentTimeMillis() + (minutes * 60 * 1000);
+        
+        // 1. تفعيل المنبه
+        scheduleAlarm(task, triggerTime);
+        
+        // 2. حفظ المهمة في الذاكرة الدائمة
+        saveTaskToMemory(task, triggerTime);
+        
+        // 3. عرضها في الشاشة
+        addVisualTask(task, minutes, triggerTime);
+        
+        Toast.makeText(this, "تم ضبط المنبه ✅", Toast.LENGTH_SHORT).show();
+    }
+
+    private void addVisualTask(String title, int minutesLeft, long triggerTime) {
+        if (tasksContainer == null) return;
         
         LinearLayout item = new LinearLayout(this);
         item.setOrientation(LinearLayout.HORIZONTAL);
-        item.setPadding(30, 30, 30, 30);
-        item.setBackgroundColor(0xFF1E293B); // نفس لون الخلفية الداكنة
+        item.setPadding(40, 40, 40, 40);
+        item.setBackgroundColor(0xFF1E293B); 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 0, 0, 20);
@@ -91,58 +103,124 @@ public class MainActivity extends Activity {
         titleView.setText(title);
         titleView.setTextSize(18);
         titleView.setTextColor(0xFFFFFFFF);
+        titleView.setTypeface(null, android.graphics.Typeface.BOLD);
         
         TextView timeView = new TextView(this);
-        timeView.setText("⏰ تذكير بعد " + minutes + " دقيقة");
+        String timeText = (minutesLeft > 0) ? "⏰ بعد " + minutesLeft + " دقيقة" : "⏰ مجدول: " + android.text.format.DateFormat.format("hh:mm a", triggerTime);
+        timeView.setText(timeText);
         timeView.setTextColor(0xFFF59E0B);
+        timeView.setPadding(0, 10, 0, 0);
         
         textContainer.addView(titleView);
         textContainer.addView(timeView);
         item.addView(textContainer);
         
-        container.addView(item, 0);
+        // جعل العنصر قابلاً للضغط (للتعديل والحذف)
+        item.setOnClickListener(v -> showEditDialog(title, triggerTime, item));
+        
+        tasksContainer.addView(item, 0);
     }
 
-    // دالة التسجيل الصوتي (مع إجبار اللغة العربية)
+    // نافذة خيارات عند الضغط على المهمة
+    private void showEditDialog(String currentTitle, long oldTime, View itemView) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert);
+        builder.setTitle("خيارات المهمة");
+        
+        String[] options = {"تمديد الوقت (+15 دقيقة)", "حذف / تم الانتهاء", "إلغاء"};
+        builder.setItems(options, (dialog, which) -> {
+            if (which == 0) {
+                // تمديد الوقت
+                removeTaskFromMemory(currentTitle); // حذف القديم
+                createNewTask(currentTitle, 15); // إنشاء جديد بـ +15
+                tasksContainer.removeView(itemView); // تحديث الشاشة
+            } else if (which == 1) {
+                // حذف
+                removeTaskFromMemory(currentTitle);
+                tasksContainer.removeView(itemView);
+                cancelAlarm(currentTitle);
+                Toast.makeText(this, "تم حذف المهمة", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.show();
+    }
+
+    // --- قسم الحفظ (SharedPreferences) ---
+    private void saveTaskToMemory(String task, long time) {
+        SharedPreferences.Editor editor = prefs.edit();
+        // نستخدم مفتاح مركب لتخزين الوقت: "TaskName_TIME"
+        editor.putLong(task + "_TIME", time);
+        editor.apply();
+    }
+
+    private void removeTaskFromMemory(String task) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.remove(task + "_TIME");
+        editor.apply();
+    }
+
+    private void loadSavedTasks() {
+        Map<String, ?> allEntries = prefs.getAll();
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            String key = entry.getKey();
+            if (key.endsWith("_TIME")) {
+                String taskName = key.replace("_TIME", "");
+                long time = (Long) entry.getValue();
+                
+                // حساب الوقت المتبقي للعرض
+                long diff = time - System.currentTimeMillis();
+                if (diff > 0) {
+                    addVisualTask(taskName, (int)(diff / 60000), time);
+                } else {
+                    // تنظيف المهام القديمة جداً
+                    removeTaskFromMemory(taskName);
+                }
+            }
+        }
+    }
+
+    // --- قسم المنبه والصوت ---
     private void startVoiceInput() {
         try {
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            
-            // ============================================================
-            // كود إجبار اللغة العربية (مصر) حتى لو الهاتف إنجليزي
-            // ============================================================
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ar-EG");
-            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "ar-EG"); 
-            intent.putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, "ar-EG");
-            
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "تحدث الآن بالعربية...");
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "تحدث الآن...");
             startActivityForResult(intent, 10);
-            
-            if(voiceStatus != null) voiceStatus.setText("جاري الاستماع...");
-            
         } catch (Exception e) {
-            Toast.makeText(this, "خدمة الصوت غير متوفرة", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "غير مدعوم", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void scheduleAlarm(String task, int minutes) {
+    private void scheduleAlarm(String task, long triggerTime) {
         try {
             AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(this, AlarmReceiver.class);
             intent.putExtra("task_name", task);
+            // RequestCode فريد لكل مهمة بناءً على الاسم لضمان عدم التداخل
+            int uniqueId = task.hashCode();
+            PendingIntent pi = PendingIntent.getBroadcast(this, uniqueId, intent, PendingIntent.FLAG_IMMUTABLE);
             
-            // استخدام FLAG_MUTABLE أو IMMUTABLE حسب الحاجة، هنا نستخدم IMMUTABLE للأمان
-            PendingIntent pi = PendingIntent.getBroadcast(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_IMMUTABLE);
-            
-            long triggerTime = System.currentTimeMillis() + (minutes * 60 * 1000);
             if (am != null) {
-                // إجبار المنبه على العمل بدقة حتى في وضع السكون
-                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pi);
+                // استخدام setAlarmClock لضمان الدقة القصوى والظهور فوق "عدم الإزعاج"
+                AlarmManager.AlarmClockInfo info = new AlarmManager.AlarmClockInfo(triggerTime, pi);
+                am.setAlarmClock(info, pi);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void cancelAlarm(String task) {
+        try {
+            AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(this, AlarmReceiver.class);
+            int uniqueId = task.hashCode();
+            PendingIntent pi = PendingIntent.getBroadcast(this, uniqueId, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_NO_CREATE);
+            if (pi != null && am != null) {
+                am.cancel(pi);
+                pi.cancel();
+            }
+        } catch (Exception e) {}
     }
 
     private void checkOverlayPermission() {
@@ -158,12 +236,8 @@ public class MainActivity extends Activity {
         if (requestCode == 10 && resultCode == RESULT_OK && data != null) {
             ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             if (result != null && !result.isEmpty()) {
-                if (taskInput != null) {
-                    taskInput.setText(result.get(0));
-                }
-                if (voiceStatus != null) {
-                    voiceStatus.setText("تم الالتقاط: " + result.get(0));
-                }
+                if (taskInput != null) taskInput.setText(result.get(0));
+                if (voiceStatus != null) voiceStatus.setText("تم!");
             }
         }
     }
