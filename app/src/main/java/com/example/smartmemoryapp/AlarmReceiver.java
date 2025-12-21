@@ -30,11 +30,10 @@ public class AlarmReceiver extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // 2. إنشاء القناة
+        // 2. إنشاء القناة (مطلوب للهواتف الحديثة)
         createNotificationChannel(context);
 
-        // 3. بناء الإشعار باستخدام الأدوات الأصلية (Notification.Builder)
-        // هذا الكود يعمل بدون أي مكتبات خارجية
+        // 3. بناء الإشعار باستخدام الأدوات الأصلية للنظام (بدون مكتبات خارجية)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder builder = new Notification.Builder(context, CHANNEL_ID)
                     .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -43,13 +42,13 @@ public class AlarmReceiver extends BroadcastReceiver {
                     .setCategory(Notification.CATEGORY_ALARM)
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setAutoCancel(true)
-                    // الأمر الذي يفتح الشاشة
+                    // هذا الأمر يجبر الشاشة على الفتح
                     .setFullScreenIntent(fullScreenPendingIntent, true);
 
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         } else {
-            // للهواتف القديمة جداً (احتياطي)، نفتح النشاط مباشرة
+            // للهواتف القديمة جداً، نفتح الشاشة مباشرة
             context.startActivity(fullScreenIntent);
         }
     }
@@ -65,7 +64,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             channel.enableLights(true);
             channel.setLightColor(Color.RED);
             channel.enableVibration(true);
-            channel.setSound(null, null); // الصوت يأتي من الشاشة نفسها
+            channel.setSound(null, null); // الصوت سيخرج من الشاشة نفسها
             
             NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
             if (notificationManager != null) {
