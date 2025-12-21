@@ -83,6 +83,17 @@
             android:layout_marginBottom="30dp">
 
             <Button
+                android:id="@+id/btn1m"
+                android:text="تجربة (1 دقيقة) 🚀"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="2" 
+                android:layout_gravity="fill_horizontal"
+                android:layout_margin="5dp"
+                android:backgroundTint="#EF4444"
+                android:textColor="#FFF"/>
+
+            <Button
                 android:id="@+id/btn15m"
                 android:text="بعد 15 دقيقة ⏱️"
                 android:layout_width="0dp"
