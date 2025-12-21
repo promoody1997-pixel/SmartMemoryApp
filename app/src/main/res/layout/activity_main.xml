@@ -1,56 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212">
+    android:background="#0F172A"
+    android:fillViewport="true">
 
     <LinearLayout
-        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#1E1E1E"
-        android:padding="30dp"
-        android:elevation="10dp">
+        android:padding="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
+            
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ذاكرة المهندس 🧠"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#1E293B"
+            android:padding="25dp"
+            android:gravity="center"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="اضغط الميكروفون لتسجيل مهمة..."
+                android:textColor="#94A3B8"
+                android:textSize="16sp"
+                android:layout_marginBottom="20dp"/>
+
+            <Button
+                android:id="@+id/btnMicMain"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:text="🎤"
+                android:textSize="30sp"
+                android:backgroundTint="#3B82F6"
+                android:textColor="#FFF"
+                android:layout_marginBottom="10dp"/>
+                
+            <TextView
+                android:id="@+id/voiceStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="جاري الانتظار..."
+                android:textColor="#64748B"
+                android:textSize="14sp"/>
+        </LinearLayout>
+        
+        <EditText
+            android:id="@+id/mainTaskInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="أو اكتب المهمة هنا..."
+            android:textColor="#FFF"
+            android:textColorHint="#475569"
+            android:background="#1E293B"
+            android:padding="15dp"
+            android:layout_marginBottom="20dp"
+            android:minHeight="50dp"/>
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:layout_marginBottom="30dp">
+
+            <Button
+                android:id="@+id/btn15m"
+                android:text="بعد 15 دقيقة ⏱️"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="5dp"
+                android:backgroundTint="#059669"
+                android:textColor="#FFF"/>
+
+            <Button
+                android:id="@+id/btn30m"
+                android:text="بعد 30 دقيقة ⏱️"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="5dp"
+                android:backgroundTint="#0D9488"
+                android:textColor="#FFF"/>
+
+            <Button
+                android:id="@+id/btn1h"
+                android:text="بعد ساعة 🕐"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="5dp"
+                android:backgroundTint="#2563EB"
+                android:textColor="#FFF"/>
+
+            <Button
+                android:id="@+id/btn2h"
+                android:text="بعد ساعتين 🕑"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="5dp"
+                android:backgroundTint="#7C3AED"
+                android:textColor="#FFF"/>
+
+        </GridLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="مساعد الذاكرة 🧠"
-            android:textColor="#FFFFFF"
-            android:textSize="26sp"
-            android:textStyle="bold" />
+            android:text="المهام الجارية"
+            android:textColor="#E2E8F0"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="15dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/tasksContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="لا تنسَ مهامك اليوم.."
-            android:textColor="#BB86FC"
-            android:textSize="16sp"
-            android:layout_marginTop="5dp" />
+            android:orientation="vertical">
+        </LinearLayout>
+
     </LinearLayout>
-
-    <ListView
-        android:id="@+id/tasksList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/header"
-        android:padding="10dp"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="10dp"/>
-
-    <Button
-        android:id="@+id/fabAdd"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="24dp"
-        android:text="+"
-        android:textSize="36sp"
-        android:backgroundTint="#03DAC5"
-        android:textColor="#000000"
-        android:elevation="10dp"
-        android:stateListAnimator="@null"/>
-
-</RelativeLayout>
+</ScrollView>
