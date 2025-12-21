@@ -9,66 +9,60 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="16dp">
 
-        <LinearLayout
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="20dp">
-            
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="ذاكرة المهندس 🧠"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
+            android:text="ذاكرة المهندس 🧠"
+            android:textColor="#F1F5F9"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="20dp"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="#1E293B"
-            android:padding="25dp"
+            android:padding="20dp"
             android:gravity="center"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="15dp"
+            android:elevation="4dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="اضغط الميكروفون لتسجيل مهمة..."
+                android:text="اضغط الميكروفون وسجل فوراً..."
                 android:textColor="#94A3B8"
-                android:textSize="16sp"
-                android:layout_marginBottom="20dp"/>
+                android:textSize="14sp"
+                android:layout_marginBottom="15dp"/>
 
             <Button
                 android:id="@+id/btnMicMain"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:text="🎤"
-                android:textSize="30sp"
+                android:textSize="28sp"
                 android:backgroundTint="#3B82F6"
                 android:textColor="#FFF"
-                android:layout_marginBottom="10dp"/>
+                android:layout_marginBottom="5dp"/>
                 
             <TextView
                 android:id="@+id/voiceStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="جاري الانتظار..."
+                android:text="جاهز"
                 android:textColor="#64748B"
-                android:textSize="14sp"/>
+                android:textSize="12sp"/>
         </LinearLayout>
         
         <EditText
             android:id="@+id/mainTaskInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="أو اكتب المهمة هنا..."
+            android:hint="أو اكتب المهمة يدوياً..."
             android:textColor="#FFF"
             android:textColorHint="#475569"
             android:background="#1E293B"
@@ -80,69 +74,100 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:columnCount="2"
-            android:layout_marginBottom="30dp">
-
-            <Button
-                android:id="@+id/btn1m"
-                android:text="تجربة (1 دقيقة) 🚀"
-                android:layout_width="0dp"
-                android:layout_height="60dp"
-                android:layout_columnWeight="2" 
-                android:layout_gravity="fill_horizontal"
-                android:layout_margin="5dp"
-                android:backgroundTint="#EF4444"
-                android:textColor="#FFF"/>
+            android:rowCount="5"
+            android:layout_marginBottom="20dp">
 
             <Button
                 android:id="@+id/btn15m"
-                android:text="بعد 15 دقيقة ⏱️"
+                android:text="بعد 15 دقيقة"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_columnWeight="1"
-                android:layout_margin="5dp"
+                android:layout_margin="4dp"
                 android:backgroundTint="#059669"
                 android:textColor="#FFF"/>
 
             <Button
-                android:id="@+id/btn30m"
-                android:text="بعد 30 دقيقة ⏱️"
+                android:id="@+id/btnNoAlarm"
+                android:text="حفظ (بدون منبه)"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_columnWeight="1"
-                android:layout_margin="5dp"
-                android:backgroundTint="#0D9488"
+                android:layout_margin="4dp"
+                android:backgroundTint="#334155"
                 android:textColor="#FFF"/>
 
             <Button
                 android:id="@+id/btn1h"
-                android:text="بعد ساعة 🕐"
+                android:text="بعد ساعة"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_columnWeight="1"
-                android:layout_margin="5dp"
-                android:backgroundTint="#2563EB"
+                android:layout_margin="4dp"
+                android:backgroundTint="#0E7490"
+                android:textColor="#FFF"/>
+
+            <Button
+                android:id="@+id/btn30m"
+                android:text="بعد 30 دقيقة"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:backgroundTint="#0D9488"
+                android:textColor="#FFF"/>
+
+            <Button
+                android:id="@+id/btn4h"
+                android:text="بعد 4 ساعات"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:backgroundTint="#4338CA"
                 android:textColor="#FFF"/>
 
             <Button
                 android:id="@+id/btn2h"
-                android:text="بعد ساعتين 🕑"
+                android:text="بعد ساعتين"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_columnWeight="1"
-                android:layout_margin="5dp"
+                android:layout_margin="4dp"
+                android:backgroundTint="#1D4ED8"
+                android:textColor="#FFF"/>
+
+            <Button
+                android:id="@+id/btnCustom"
+                android:text="📅 وقت وتكرار"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
+                android:backgroundTint="#475569"
+                android:textColor="#FFF"/>
+
+            <Button
+                android:id="@+id/btnEndOfDay"
+                android:text="نهاية اليوم (10م)"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_columnWeight="1"
+                android:layout_margin="4dp"
                 android:backgroundTint="#7C3AED"
                 android:textColor="#FFF"/>
 
         </GridLayout>
 
         <TextView
+            android:id="@+id/tasksHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="المهام الجارية"
             android:textColor="#E2E8F0"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginBottom="15dp"/>
+            android:layout_marginBottom="10dp"/>
 
         <LinearLayout
             android:id="@+id/tasksContainer"
